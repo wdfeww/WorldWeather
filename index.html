@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>World weather</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
+        .results {
+            margin: 3px;
+            padding: 8px;
+            border: 0.5px solid black;
+        }
+        
+        .results:hover {
+            border: 3px solid green;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="col-md-12">
+        <div class="col-md-4 col-sm-offset-4">
+            <form class=" navbar-form navbar-left" id="form">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="country" placeholder="Country">
+                    <input type="text" class="form-control" id="city" placeholder="City">
+                </div>
+                <button type="button" id="btn" class="btn btn-default">Search weather</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var json;
+            $("#results").hide();
+
+            function initResults() {
+                $("<div/>", {
+                    "id": 'results',
+                    "class": 'col-md-12'
+                }).appendTo("body");
+                $("<h2/>").text("Restults:").appendTo("#results");
+            }
+
+            function showForecastO() {
+                console.log("clicked to object");
+            }
+
+            function showForecastA(i) {
+                console.log("clicked to array number " + i);
+            }
+
+            $("#btn").on('click', function() {
+
+                var city = $("#city").val();
+                var country = $("#country").val();
+                console.log(country + " " + city);
+                if (city == "")
+                    $("#city").val("Please fill CITY!");
+                if (country == "")
+                    $("#country").val("Please fill COUNTRY!");
+                if (city != "" && country != "") {
+                    $.ajax({
+                            url: "https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places where text%3D\"" + country + "%2C" + city + "\")&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=",
+                            dataType: "json",
+                            method: "GET"
+                        })
+                        .done(function(data) {
+                            json = data;
+                            $("#results").remove();
+                            initResults();
+                            if (data.query.count == 0) {
+                                $("#error").remove();
+                                $("<div/>", {
+                                    "id": 'error',
+                                    "class": 'col-md-2'
+                                }).text("No results, wrong state or city!").appendTo("#results");
+
+                            } else {
+                                $("#error").remove();
+                                if (data.query.count > 1) {
+                                    console.log("Its Array");
+                                    console.log(data.query);
+                                    for (var i = 0; i < data.query.count; i++) {
+                                        $("<div/>", {
+                                            "id": 'object' + i,
+                                            "class": 'results col-md-2'
+                                        }).appendTo("#results");
+                                        $("<p/>").html("<b>Country:</b> <i>" + data.query.results.channel[i].location.country + "</i>").appendTo("#object" + i);
+                                        $("<p/>").html("<b>City:</b> <i>" + data.query.results.channel[i].location.city + "</i>").appendTo("#object" + i);
+                                        $("<p/>").html("<b>Region:</b> <i>" + data.query.results.channel[i].location.region + "</i>").appendTo("#object" + i);
+                                    }
+                                    $(".results").on('click', function() {
+                                        var len = $(this).attr('id').length;
+                                        showForecastA(parseInt($(this).attr('id').substring(6, len)));
+                                    });
+                                }
+
+                                if (data.query.count == 1) {
+                                    console.log("Its Object");
+                                    $("<div/>", {
+                                        "id": 'object',
+                                        "class": 'results col-md-2'
+                                    }).appendTo("#results");
+                                    $("<p/>").html("<b>Country:</b> <i>" + data.query.results.channel.location.country + "</i>").appendTo("#object");
+                                    $("<p/>").html("<b>City:</b> <i>" + data.query.results.channel.location.city + "</i>").appendTo("#object");
+                                    $("<p/>").html("<b>Region:</b> <i>" + data.query.results.channel.location.region + "</i>").appendTo("#object");
+                                    $(".results").on('click', function() {
+                                        showForecastO();
+                                    });
+                                }
+                            }
+                        })
+                        .fail(function() {
+                            $("#results").remove();
+                        });
+                }
+            });
+
+        });
+
+    </script>
+</body>
+
+
+</html>
