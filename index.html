@@ -16,13 +16,15 @@
         }
         
         .results:hover {
-            border: 3px solid green;
+            background-color: green;
+            cursor: pointer;
         }
         
         .forecasts {
             padding-left: 20px !important;
             padding-top: 40px !important;
         }
+
     </style>
 </head>
 
@@ -38,29 +40,29 @@
         </div>
     </div>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             var json;
             $("#results").hide();
 
             function initResults() {
                 $("<div/>", {
-                    "id": 'results'
-                    , "class": 'col-md-12'
+                    "id": 'results',
+                    "class": 'col-md-12'
                 }).appendTo("body");
-                $("<h2/>").text("Restults:").appendTo("#results");
+                $("<h2/>").text("Results:").appendTo("#results");
             }
 
             function showForecastO() {
                 $("#forecast").remove();
                 console.log("clicked to object");
                 $("<div/>", {
-                    "id": 'forecast'
-                    , "class": 'col-md-12'
+                    "id": 'forecast',
+                    "class": 'col-md-12'
                 }).appendTo("body");
                 for (var j = 0; j < 10; j++) {
                     $("<div/>", {
-                        "id": 'result' + j
-                        , "class": 'forecasts col-md-2'
+                        "id": 'result' + j,
+                        "class": 'forecasts col-md-2'
                     }).appendTo("#forecast");
                     var max = Math.round((parseFloat(json.query.results.channel.item.forecast[j].high) - 32) / 1.8);
                     var low = Math.round((parseFloat(json.query.results.channel.item.forecast[j].low) - 32) / 1.8);
@@ -76,13 +78,13 @@
                 $("#forecast").remove();
                 console.log("clicked to array number " + i);
                 $("<div/>", {
-                    "id": 'forecast'
-                    , "class": 'col-md-12'
+                    "id": 'forecast',
+                    "class": 'col-md-12'
                 }).appendTo("body");
                 for (var j = 0; j < 10; j++) {
                     $("<div/>", {
-                        "id": 'result' + j
-                        , "class": 'forecasts col-md-2'
+                        "id": 'result' + j,
+                        "class": 'forecasts col-md-2'
                     }).appendTo("#forecast");
                     var max = Math.round((parseFloat(json.query.results.channel[i].item.forecast[j].high) - 32) / 1.8);
                     var low = Math.round((parseFloat(json.query.results.channel[i].item.forecast[j].low) - 32) / 1.8);
@@ -93,7 +95,7 @@
                     $("<p/>").html("<b>Description:</b> <i>" + json.query.results.channel[i].item.forecast[j].text + "</i>").appendTo("#result" + j);
                 }
             }
-            $("#btn").on('click', function () {
+            $("#btn").on('click', function() {
                 var city = $("#city").val();
                 var country = $("#country").val();
                 console.log(country + " " + city);
@@ -101,10 +103,10 @@
                 if (country == "") $("#country").val("Please fill COUNTRY!");
                 if (city != "" && country != "") {
                     $.ajax({
-                        url: "https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places where text%3D\"" + country + "%2C" + city + "\")&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
-                        , dataType: "json"
-                        , method: "GET"
-                    }).done(function (data) {
+                        url: "https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places where text%3D\"" + country + "%2C" + city + "\")&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=",
+                        dataType: "json",
+                        method: "GET"
+                    }).done(function(data) {
                         json = data;
                         $("#results").remove();
                         $("#forecast").remove();
@@ -112,25 +114,24 @@
                         if (data.query.count == 0) {
                             $("#error").remove();
                             $("<div/>", {
-                                "id": 'error'
-                                , "class": 'col-md-2'
+                                "id": 'error',
+                                "class": 'col-md-2'
                             }).text("No results, wrong state or city!").appendTo("#results");
-                        }
-                        else {
+                        } else {
                             $("#error").remove();
                             if (data.query.count > 1) {
                                 console.log("Its Array");
                                 console.log(data.query);
                                 for (var i = 0; i < data.query.count; i++) {
                                     $("<div/>", {
-                                        "id": 'object' + i
-                                        , "class": 'results col-md-2'
+                                        "id": 'object' + i,
+                                        "class": 'results col-md-2'
                                     }).appendTo("#results");
                                     $("<p/>").html("<b>Country:</b> <i>" + data.query.results.channel[i].location.country + "</i>").appendTo("#object" + i);
                                     $("<p/>").html("<b>City:</b> <i>" + data.query.results.channel[i].location.city + "</i>").appendTo("#object" + i);
                                     $("<p/>").html("<b>Region:</b> <i>" + data.query.results.channel[i].location.region + "</i>").appendTo("#object" + i);
                                 }
-                                $(".results").on('click', function () {
+                                $(".results").on('click', function() {
                                     var len = $(this).attr('id').length;
                                     showForecastA(parseInt($(this).attr('id').substring(6, len)));
                                 });
@@ -138,23 +139,24 @@
                             if (data.query.count == 1) {
                                 console.log("Its Object");
                                 $("<div/>", {
-                                    "id": 'object'
-                                    , "class": 'results col-md-2'
+                                    "id": 'object',
+                                    "class": 'results col-md-2'
                                 }).appendTo("#results");
                                 $("<p/>").html("<b>Country:</b> <i>" + data.query.results.channel.location.country + "</i>").appendTo("#object");
                                 $("<p/>").html("<b>City:</b> <i>" + data.query.results.channel.location.city + "</i>").appendTo("#object");
                                 $("<p/>").html("<b>Region:</b> <i>" + data.query.results.channel.location.region + "</i>").appendTo("#object");
-                                $(".results").on('click', function () {
+                                $(".results").on('click', function() {
                                     showForecastO();
                                 });
                             }
                         }
-                    }).fail(function () {
+                    }).fail(function() {
                         $("#results").remove();
                     });
                 }
             });
         });
+
     </script>
 </body>
 
